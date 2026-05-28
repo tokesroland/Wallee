@@ -1,10 +1,17 @@
 using Wallee.Components;
+using Microsoft.EntityFrameworkCore;
+using Wallee.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// EF Core + MySQL
+var conn = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContextFactory<WalleeDbContext>(options =>
+    options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
 
 var app = builder.Build();
 
