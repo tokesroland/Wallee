@@ -1,0 +1,103 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+        <main>
+            <!-- Napi keret progress -->
+            <section class="progress-section">
+                <div class="progress-info">
+                    <p class="label">Napi keret</p>
+                    <p class="amount">5 000 Ft</p>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: 62%"></div>
+                </div>
+                <span class="progress-pct">62%</span>
+            </section>
+
+            <!-- Egyenleg -->
+            <div class="card balance-card">
+                <p class="card-label">Egyenleg</p>
+                <p class="card-value">15 000 Ft</p>
+                <p class="card-sub">Összes tárcán</p>
+                <span class="badge">↑ +12% ez a hónap</span>
+            </div>
+
+            <!-- Aktív tárca előnézet -->
+            <div class="card wallet-preview-card">
+                <select class="wallet-select">
+                    <option value="1">Tárca 1 – Napi kiadások</option>
+                    <option value="2">Tárca 2 – Utazás</option>
+                    <option value="3">Tárca 3 – Megtakarítás</option>
+                    <option value="new">+ Új tárca</option>
+                </select>
+                <p class="card-label">Megtakarítás</p>
+                <p class="card-value">5 000 Ft</p>
+                <p class="card-sub">Jelenlegi tárca egyenlege</p>
+            </div>
+
+            <!-- Tranzakciók -->
+            <section class="transactions-section">
+                <div class="card">
+
+                    <div class="transactions-header">
+                        <h2>Legutóbbi tranzakciók</h2>
+                    </div>
+
+                    <div class="filter-bar">
+                        <select>
+                            <option value="">Összes kategória</option>
+                            <option></option>
+                        </select>
+
+                        <label>Tól:</label>
+                        <input type="date">
+
+                        <label>Ig:</label>
+                        <input type="date">
+
+                        <div class="range-wrap">
+                            <label>Max összeg:</label>
+                            <input type="range"
+                                   min="0" max="100000" step="1000">
+                            <span style="font-size:12px;color:var(--text-secondary);min-width:60px">
+                                10000 Ft
+                            </span>
+                        </div>
+
+                        <select>
+                            <option value="">Összes típus</option>
+                            <option value="expense">Kiadás</option>
+                            <option value="income">Bevétel</option>
+                            <option value="transfer">Átutalás</option>
+                        </select>
+
+                        <button class="btn btn-ghost">Törlés</button>
+                        <button class="btn btn-primary">+ Rögzítés</button>
+                    </div>
+
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Dátum</th>
+                                <th>Leírás</th>
+                                <th>Kategória</th>
+                                <th>Tárca</th>
+                                <th>Összeg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td><span></span></td>
+                                <td><span class="wallet-tag"></span></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+        </main>

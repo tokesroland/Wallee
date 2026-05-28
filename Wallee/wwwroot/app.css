@@ -1,0 +1,387 @@
+:root {
+    --coral: #ee6a59;
+    --navy: #3a3f58;
+    --amber: #f9ac67;
+    --cream: #ece6cd;
+    --coral-light: #faf0ee;
+    --navy-light: #f0f1f5;
+    --amber-light: #fff7ef;
+    --text-primary: #2b2e3f;
+    --text-secondary: #7a7d8e;
+    --text-muted: #b0b3c1;
+    --bg: #f7f5ef;
+    --surface: #ffffff;
+    --border: rgba(58, 63, 88, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "DM Sans", sans-serif;
+    background-color: var(--bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+
+/* ── Layout ── */
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 1.25rem;
+}
+
+/* ── Card base ── */
+.card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+}
+
+.card-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.card-value {
+    font-family: "DM Serif Display", serif;
+    font-size: 32px;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.card-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+}
+
+/* ── Progress bar section ── */
+.progress-section {
+    grid-column: 1 / -1;
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.progress-info {
+    flex-shrink: 0;
+}
+
+    .progress-info .label {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: rgba(236, 230, 205, 0.55);
+        margin-bottom: 2px;
+    }
+
+    .progress-info .amount {
+        font-family: "DM Serif Display", serif;
+        font-size: 22px;
+        color: var(--cream);
+    }
+
+.progress-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 62%;
+    background: var(--coral);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+.progress-pct {
+    font-size: 13px;
+    color: rgba(236, 230, 205, 0.6);
+    flex-shrink: 0;
+}
+
+/* ── Balance card ── */
+.balance-card {
+    background: var(--coral);
+    border: none;
+}
+
+    .balance-card .card-label {
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+    .balance-card .card-value {
+        color: #fff;
+    }
+
+    .balance-card .card-sub {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .balance-card .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
+        font-size: 12px;
+        padding: 3px 10px;
+        border-radius: 99px;
+        margin-top: 0.75rem;
+    }
+
+/* ── Wallet card ── */
+.wallet-card {
+    background: var(--amber-light);
+    border-color: rgba(249, 172, 103, 0.25);
+}
+
+    .wallet-card .card-label {
+        color: #c47a30;
+    }
+
+    .wallet-card .card-value {
+        color: var(--navy);
+    }
+
+.wallet-select {
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(249, 172, 103, 0.35);
+    border-radius: 8px;
+    padding: 5px 10px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233A3F58' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+}
+
+/* ── Transactions section ── */
+.transactions-section {
+    grid-column: 1 / -1;
+}
+
+    .transactions-section .card {
+        padding: 0;
+        overflow: hidden;
+    }
+
+.transactions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+    .transactions-header h2 {
+        font-family: "DM Serif Display", serif;
+        font-size: 18px;
+        font-weight: 400;
+        color: var(--text-primary);
+    }
+
+/* ── Filter bar ── */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0.875rem 1.5rem;
+    background: var(--navy-light);
+    border-bottom: 1px solid var(--border);
+}
+
+    .filter-bar select,
+    .filter-bar input[type="date"] {
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        color: var(--text-primary);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 10px;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+        .filter-bar select:hover,
+        .filter-bar input[type="date"]:hover {
+            border-color: rgba(58, 63, 88, 0.25);
+        }
+
+    .filter-bar label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    .filter-bar .range-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .filter-bar input[type="range"] {
+        width: 90px;
+        accent-color: var(--coral);
+    }
+
+.btn {
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 5px 14px;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+    .btn-outline:hover {
+        background: rgba(0, 0, 0, 0.04);
+    }
+
+.btn-primary {
+    background: var(--coral);
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        opacity: 0.88;
+    }
+
+/* ── Table ── */
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .transactions-table thead th {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        padding: 10px 1.5rem;
+        text-align: left;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+    }
+
+        .transactions-table thead th:last-child {
+            text-align: right;
+        }
+
+    .transactions-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+    }
+
+        .transactions-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .transactions-table tbody tr:hover {
+            background: var(--navy-light);
+        }
+
+    .transactions-table tbody td {
+        padding: 12px 1.5rem;
+        font-size: 14px;
+        color: var(--text-primary);
+    }
+
+        .transactions-table tbody td:last-child {
+            text-align: right;
+        }
+
+.category-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 9px;
+    border-radius: 99px;
+    background: var(--cream);
+    color: var(--navy);
+}
+
+    .category-badge.income {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+.amount-negative {
+    color: var(--coral);
+    font-weight: 500;
+}
+
+.amount-positive {
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+.wallet-tag {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ── Responsive ── */
+/*@media (max-width: 680px) {
+    main {
+        grid-template-columns: 1fr;
+        padding: 1rem 1rem 3rem;
+    }
+
+    .progress-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .progress-track {
+        width: 100%;
+    }
+}*/
