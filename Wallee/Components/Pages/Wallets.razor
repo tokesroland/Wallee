@@ -1,0 +1,208 @@
+﻿@page "/wallets"
+@rendermode InteractiveServer
+
+<PageTitle>Wallets</PageTitle>
+
+            <!-- Összesítő sáv -->
+            <div class="summary-bar">
+                <div class="sum-item">
+                    <p class="sum-label">Összes egyenleg</p>
+                    <p class="sum-value">10000 Ft</p>
+                </div>
+                <div class="sum-divider"></div>
+                <div class="sum-item">
+                    <p class="sum-label">Allokált</p>
+                    <p class="sum-value">10000 Ft</p>
+                </div>
+                <div class="alloc-track">
+                    <div class="alloc-fill"></div>
+                </div>
+                <div class="sum-item">
+                    <p class="sum-label">Szabad</p>
+                    <p class="sum-value">10000 Ft</p>
+                </div>
+            </div>
+
+            <!-- Tárca kártyák -->
+            <div class="wallets-grid">
+                <div>
+                    <div class="wc-icon"></div>
+                    <div class="wc-name"></div>
+                    <div class="wc-amount">20000 Ft</div>
+                    <div class="wc-sub"></div>
+                    <div class="wc-bar">
+                        <div class="wc-bar-fill">
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wallet-card wallet-card-new">
+                    <span class="plus-icon">+</span>
+                    <span>Új tárca</span>
+                </div>
+            </div>
+
+            <!-- Részletek panel -->
+            <div class="detail-panel">
+
+                <div class="detail-panel-header">
+                    <h3></h3>
+                    <div class="header-actions">
+                        <button class="btn btn-outline">Mentés</button>
+                        <button class="btn btn-danger">Archiválás</button>
+                    </div>
+                </div>
+
+                <div class="detail-body">
+
+                    <!-- Bal: szerkesztő -->
+                    <div class="edit-col">
+                        <p class="col-title">Tárca beállításai</p>
+
+                        <div class="form-group">
+                            <label>Név</label>
+                            <input type="text">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Leírás</label>
+                            <input type="text">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ikon</label>
+                            <div class="icon-picker">
+                                <button>
+
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Szín</label>
+                            <div class="color-picker">
+                                <div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Jobb: műveletek -->
+                    <div class="actions-col">
+                        <p class="col-title">Műveletek</p>
+
+                        <div class="action-card">
+                            <p class="ac-title">Feltöltés</p>
+                            <p class="ac-desc">Összeg áthelyezése a fő számláról ebbe a tárcába.</p>
+                            <div class="ac-row">
+                                <input type="number" placeholder="Összeg (Ft)" min="0">
+                                <button class="btn btn-primary">Feltölt</button>
+                            </div>
+                        </div>
+
+                        <div class="action-card">
+                            <p class="ac-title">Kivét</p>
+                            <p class="ac-desc">Összeg visszautalása a fő számlára.</p>
+                            <div class="ac-row">
+                                <input type="number" placeholder="Összeg (Ft)" min="0">
+                                <button class="btn btn-outline">Kivét</button>
+                            </div>
+                        </div>
+
+                        <div class="action-card">
+                            <p class="ac-title">Tárca → Tárca átutalás</p>
+                            <p class="ac-desc">Összeg áthelyezése egy másik tárcába.</p>
+                            <div class="ac-row">
+                                <input type="number" placeholder="Összeg (Ft)" min="0">
+                                <select>
+                                    <option value="">Cél tárca...</option>
+                                    <option>
+
+                                    </option>
+                                </select>
+                                <button class="btn btn-outline">Küld</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Tranzakciók (copy of transactions-section, Tárca oszlop nélkül) -->
+            <section class="transactions-section">
+                <div class="card">
+
+                    <div class="transactions-header">
+                        <h2>Tranzakciók</h2>
+                    </div>
+
+                    <div class="filter-bar">
+                        <select>
+                            <option value="">Összes kategória</option>
+                            <option></option>
+                        </select>
+
+                        <label>Tól:</label>
+                        <input type="date">
+
+                        <label>Ig:</label>
+                        <input type="date">
+
+                        <div class="range-wrap">
+                            <label>Max összeg:</label>
+                            <input type="range" min="0" max="100000" step="1000">
+                            <span style="font-size:12px;color:var(--text-secondary);min-width:60px">
+                                100000 Ft
+                            </span>
+                        </div>
+
+                        <select>
+                            <option value="">Összes típus</option>
+                            <option value="expense">Kiadás</option>
+                            <option value="income">Bevétel</option>
+                            <option value="transfer">Átutalás</option>
+                        </select>
+
+                        <button class="btn btn-ghost">Törlés</button>
+                        <button class="btn btn-primary">+ Rögzítés</button>
+                    </div>
+
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Dátum</th>
+                                <th>Leírás</th>
+                                <th>Kategória</th>
+                                <th>Összeg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td><span</span></td>
+                                <td</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:14px">
+                                    Nincs találat.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
