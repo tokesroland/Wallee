@@ -1,0 +1,101 @@
+@if (Visible)
+{
+    <div class="modal-backdrop" @onclick="OnClose"></div>
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Új tranzakció</h3>
+            <button class="modal-close" @onclick="OnClose">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="m-group">
+                <label>Összeg (Ft)</label>
+                <input type="number" min="0" @bind="model.Amount" />
+            </div>
+
+            <div class="m-group">
+                <label>Típus</label>
+                <select @bind="model.Type">
+                    <option value="@TransactionType.expense">Kiadás</option>
+                    <option value="@TransactionType.income">Bevétel</option>
+                    <option value="@TransactionType.transfer">Átutalás</option>
+                </select>
+            </div>
+
+            <div class="m-group">
+                <label>Pénznem</label>
+                <input type="text" @bind="model.Currency" />
+            </div>
+
+            <div class="m-group">
+                <label>Leírás</label>
+                <input type="text" @bind="model.Description" />
+            </div>
+
+            <div class="m-group">
+                <label>Tárca</label>
+                <select @bind="model.WalletID">
+                    @foreach (var w in Wallets)
+                    {
+                        <option value="@w.ID">@w.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="m-group">
+                <label>Kategória (opcionális)</label>
+                <select @bind="model.CategoryID">
+                    <option value="">— nincs —</option>
+                    @foreach (var c in Categories)
+                    {
+                        <option value="@c.ID">@c.CategoryName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="m-group">
+                <label>Dátum</label>
+                <input type="date" @bind="model.Date" />
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-outline" @onclick="OnClose">Mégse</button>
+            <button class="btn btn-primary" @onclick="Save">Mentés</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public List<Wallet> Wallets { get; set; } = new();
+    [Parameter] public List<Category> Categories { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<Transaction> OnSave { get; set; }
+
+    private Transaction model = NewModel();
+    private bool _wasVisible;
+
+    protected override void OnParametersSet()
+    {
+        if (Visible && !_wasVisible)
+        {
+            model = NewModel();
+            if (Wallets.Count > 0) model.WalletID = Wallets[0].ID;
+        }
+        _wasVisible = Visible;
+    }
+
+    private static Transaction NewModel() => new()
+    {
+        Type = TransactionType.expense,
+        Currency = "HUF",
+        Date = DateTime.Today
+    };
+
+    private async Task Save()
+    {
+        if (model.Amount <= 0 || model.WalletID == 0) return;
+        await OnSave.InvokeAsync(model);
+    }
+}

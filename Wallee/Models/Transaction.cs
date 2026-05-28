@@ -1,6 +1,6 @@
 namespace Wallee.Models;
 
-public enum TransactionType { expense, income }
+public enum TransactionType { expense, income, transfer }
 
 public class Transaction
 {

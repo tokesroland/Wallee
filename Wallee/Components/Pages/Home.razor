@@ -1,101 +1,291 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject IWalletService WalletService
+@inject ICategoryService CategoryService
+@inject ITransactionService TransactionService
 
 <PageTitle>Home</PageTitle>
-        <main>
-            <!-- Napi keret progress -->
-            <section class="progress-section">
-                <div class="progress-info">
-                    <p class="label">Napi keret</p>
-                    <p class="amount">5 000 Ft</p>
-                </div>
-                <div class="progress-track">
-                    <div class="progress-fill" style="width: 62%"></div>
-                </div>
-                <span class="progress-pct">62%</span>
-            </section>
 
-            <!-- Egyenleg -->
-            <div class="card balance-card">
-                <p class="card-label">Egyenleg</p>
-                <p class="card-value">15 000 Ft</p>
-                <p class="card-sub">Összes tárcán</p>
-                <span class="badge">↑ +12% ez a hónap</span>
+<main>
+    <!-- Napi keret progress -->
+    <section class="progress-section">
+        <div class="progress-info">
+            <p class="label">Napi keret</p>
+            <div class="budget-row">
+                <input class="budget-input" type="number" min="0" step="500"
+                       value="@dailyBudget" @onchange="OnBudgetChanged" />
+                <span class="budget-ft">Ft</span>
+            </div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" style="width:@(BudgetPct)%"></div>
+        </div>
+        <span class="progress-pct">@FormatFt(spentToday) / @FormatFt(dailyBudget) · @BudgetPct%</span>
+    </section>
+
+    <!-- Egyenleg -->
+    <div class="card balance-card">
+        <p class="card-label">Egyenleg</p>
+        <p class="card-value">@FormatFt(BalanceCardValue)</p>
+        <button class="balance-toggle" @onclick="ToggleBalanceScope">
+            @(showAllBalance ? "Összes tárcán" : "Fő tárca (1)")
+        </button>
+        @if (monthlyChange is decimal pct)
+        {
+            <span class="badge">@(pct >= 0 ? $"↑ +{pct}" : $"↓ {pct}")% az előző hónaphoz</span>
+        }
+        else
+        {
+            <span class="badge">— nincs előző havi adat</span>
+        }
+    </div>
+
+    <!-- Aktív tárca előnézet -->
+    <div class="card wallet-preview-card">
+        <select class="wallet-select" @bind="selectedWalletId" @bind:after="OnWalletSelectChanged">
+            <option value="0">Összes tárca</option>
+            @foreach (var w in wallets)
+            {
+                <option value="@w.ID">@w.Name</option>
+            }
+        </select>
+        <p class="card-label">@SelectedWalletLabel</p>
+        <p class="card-value">@FormatFt(SelectedWalletBalance)</p>
+        <p class="card-sub">@(selectedWalletId == 0 ? "Összes tárca egyenlege" : "Jelenlegi tárca egyenlege")</p>
+    </div>
+
+    <!-- Tranzakciók -->
+    <section class="transactions-section">
+        <div class="card">
+            <div class="transactions-header">
+                <h2>Legutóbbi tranzakciók</h2>
             </div>
 
-            <!-- Aktív tárca előnézet -->
-            <div class="card wallet-preview-card">
-                <select class="wallet-select">
-                    <option value="1">Tárca 1 – Napi kiadások</option>
-                    <option value="2">Tárca 2 – Utazás</option>
-                    <option value="3">Tárca 3 – Megtakarítás</option>
-                    <option value="new">+ Új tárca</option>
+            <div class="filter-bar">
+                <select @bind="filterCategoryId" @bind:after="ApplyFilters">
+                    <option value="0">Összes kategória</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c.ID">@c.CategoryName</option>
+                    }
                 </select>
-                <p class="card-label">Megtakarítás</p>
-                <p class="card-value">5 000 Ft</p>
-                <p class="card-sub">Jelenlegi tárca egyenlege</p>
+
+                <label>Tól:</label>
+                <input type="date" @bind="filterFrom" @bind:after="ApplyFilters" />
+
+                <label>Ig:</label>
+                <input type="date" @bind="filterTo" @bind:after="ApplyFilters" />
+
+                <div class="range-wrap">
+                    <label>Max összeg:</label>
+                    <input type="range" min="0" max="100000" step="1000"
+                           @bind="filterMaxAmount" @bind:after="ApplyFilters" />
+                    <span style="font-size:12px;color:var(--text-secondary);min-width:60px">
+                        @FormatFt(filterMaxAmount)
+                    </span>
+                </div>
+
+                <select @bind="filterType" @bind:after="ApplyFilters">
+                    <option value="">Összes típus</option>
+                    <option value="@TransactionType.expense">Kiadás</option>
+                    <option value="@TransactionType.income">Bevétel</option>
+                    <option value="@TransactionType.transfer">Átutalás</option>
+                </select>
+
+                <button class="btn btn-ghost" @onclick="ClearFilters">Törlés</button>
+                <button class="btn btn-primary" @onclick="OpenModal">+ Rögzítés</button>
             </div>
 
-            <!-- Tranzakciók -->
-            <section class="transactions-section">
-                <div class="card">
-
-                    <div class="transactions-header">
-                        <h2>Legutóbbi tranzakciók</h2>
-                    </div>
-
-                    <div class="filter-bar">
-                        <select>
-                            <option value="">Összes kategória</option>
-                            <option></option>
-                        </select>
-
-                        <label>Tól:</label>
-                        <input type="date">
-
-                        <label>Ig:</label>
-                        <input type="date">
-
-                        <div class="range-wrap">
-                            <label>Max összeg:</label>
-                            <input type="range"
-                                   min="0" max="100000" step="1000">
-                            <span style="font-size:12px;color:var(--text-secondary);min-width:60px">
-                                10000 Ft
-                            </span>
-                        </div>
-
-                        <select>
-                            <option value="">Összes típus</option>
-                            <option value="expense">Kiadás</option>
-                            <option value="income">Bevétel</option>
-                            <option value="transfer">Átutalás</option>
-                        </select>
-
-                        <button class="btn btn-ghost">Törlés</button>
-                        <button class="btn btn-primary">+ Rögzítés</button>
-                    </div>
-
-                    <table class="transactions-table">
-                        <thead>
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Dátum</th>
+                        <th>Leírás</th>
+                        <th>Kategória</th>
+                        <th>Tárca</th>
+                        <th>Összeg</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (transactions.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:14px">
+                                Nincs találat.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var t in transactions)
+                        {
                             <tr>
-                                <th>Dátum</th>
-                                <th>Leírás</th>
-                                <th>Kategória</th>
-                                <th>Tárca</th>
-                                <th>Összeg</th>
+                                <td>@t.Date.ToString("yyyy.MM.dd")</td>
+                                <td>@(string.IsNullOrWhiteSpace(t.Description) ? "—" : t.Description)</td>
+                                <td>
+                                    @if (t.Category is not null)
+                                    {
+                                        <span class="category-badge @TypeCss(t.Type)">@t.Category.CategoryName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="wallet-tag">—</span>
+                                    }
+                                </td>
+                                <td><span class="wallet-tag">@t.Wallet?.Name</span></td>
+                                <td class="@AmountCss(t.Type)">@AmountPrefix(t.Type)@FormatFt(t.Amount)</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td><span></span></td>
-                                <td><span class="wallet-tag"></span></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
 
-                </div>
-            </section>
-        </main>
+<TransactionModal
+    Visible="modalVisible"         
+    Wallets="wallets"           
+    Categories="categories"           
+    OnClose="CloseModal"
+    OnSave="SaveTransaction" 
+/>
+
+@code {
+    private static readonly System.Globalization.NumberFormatInfo Huf =
+        new() { NumberGroupSeparator = " ", NumberDecimalDigits = 0 };
+
+    // adatok
+    private List<Wallet> wallets = new();
+    private List<Category> categories = new();
+    private List<Transaction> transactions = new();
+
+    // napi keret (phase 1: csak munkamenetre, nem perzisztens)
+    private int dailyBudget = 5000;
+    private int spentToday;
+
+    // egyenleg kártya
+    private bool showAllBalance;       // false = fő tárca (ID 1), true = összes
+    private int mainWalletBalance;
+    private int totalBalance;
+    private decimal? monthlyChange;
+
+    // tárca választó (0 = összes)
+    private int selectedWalletId;
+
+    // szűrők
+    private int filterCategoryId;
+    private DateTime? filterFrom;
+    private DateTime? filterTo;
+    private int filterMaxAmount = 100000;
+    private TransactionType? filterType;
+
+    private bool modalVisible;
+
+    protected override async Task OnInitializedAsync()
+    {
+        wallets = await WalletService.GetActiveAsync();
+        categories = await CategoryService.GetActiveAsync();
+        await RefreshSummary();
+        await ApplyFilters();
+    }
+
+    private async Task RefreshSummary()
+    {
+        spentToday = await TransactionService.GetTodaySpendingAsync();
+        totalBalance = await WalletService.GetTotalBalanceAsync();
+        var main = await WalletService.GetByIdAsync(1);
+        mainWalletBalance = main?.Balance ?? 0;
+        await RefreshMonthlyChange();
+    }
+
+    private async Task RefreshMonthlyChange()
+        => monthlyChange = await WalletService.GetMonthlyChangePercentAsync(showAllBalance ? null : 1);
+
+    private async Task ApplyFilters()
+    {
+        transactions = await TransactionService.GetAsync(new TransactionFilter
+        {
+            WalletID = selectedWalletId == 0 ? null : selectedWalletId,
+            CategoryID = filterCategoryId == 0 ? null : filterCategoryId,
+            From = filterFrom,
+            To = filterTo,
+            MaxAmount = filterMaxAmount,
+            Type = filterType
+        });
+    }
+
+    private void OnBudgetChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var v) && v >= 0)
+            dailyBudget = v;
+    }
+
+    private async Task ToggleBalanceScope()
+    {
+        showAllBalance = !showAllBalance;
+        await RefreshMonthlyChange();
+    }
+
+    private async Task OnWalletSelectChanged() => await ApplyFilters();
+
+    private async Task ClearFilters()
+    {
+        filterCategoryId = 0;
+        filterFrom = null;
+        filterTo = null;
+        filterMaxAmount = 100000;
+        filterType = null;
+        await ApplyFilters();
+    }
+
+    private void OpenModal() => modalVisible = true;
+    private void CloseModal() => modalVisible = false;
+
+    private async Task SaveTransaction(Transaction tx)
+    {
+        await TransactionService.AddAsync(tx);
+        modalVisible = false;
+        wallets = await WalletService.GetActiveAsync();
+        await RefreshSummary();
+        await ApplyFilters();
+    }
+
+    // számított értékek
+    private int BalanceCardValue => showAllBalance ? totalBalance : mainWalletBalance;
+
+    private int BudgetPct => dailyBudget <= 0
+        ? 0
+        : Math.Clamp((int)Math.Round((double)spentToday / dailyBudget * 100), 0, 100);
+
+    private string SelectedWalletLabel => selectedWalletId == 0
+        ? "Összes tárca"
+        : wallets.FirstOrDefault(w => w.ID == selectedWalletId)?.Name ?? "Tárca";
+
+    private int SelectedWalletBalance => selectedWalletId == 0
+        ? totalBalance
+        : wallets.FirstOrDefault(w => w.ID == selectedWalletId)?.Balance ?? 0;
+
+    private static string FormatFt(int amount) => amount.ToString("N0", Huf) + " Ft";
+
+    private static string AmountCss(TransactionType t) => t switch
+    {
+        TransactionType.income => "amount-positive",
+        TransactionType.expense => "amount-negative",
+        _ => "amount-transfer"
+    };
+
+    private static string AmountPrefix(TransactionType t) => t switch
+    {
+        TransactionType.income => "+",
+        TransactionType.expense => "-",
+        _ => ""
+    };
+
+    private static string TypeCss(TransactionType t) => t switch
+    {
+        TransactionType.income => "income",
+        TransactionType.transfer => "transfer",
+        _ => ""
+    };
+}

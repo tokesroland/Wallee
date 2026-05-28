@@ -1,6 +1,7 @@
 using Wallee.Components;
 using Microsoft.EntityFrameworkCore;
 using Wallee.Data;
+using Wallee.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,21 @@ var conn = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContextFactory<WalleeDbContext>(options =>
     options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
 
+// Alkalmazás szolgáltatások
+builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+
 var app = builder.Build();
+
+// Adatbázis migrálása + kezdeti adatok
+using (var scope = app.Services.CreateScope())
+{
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<WalleeDbContext>>();
+    await using var db = await factory.CreateDbContextAsync();
+    await db.Database.MigrateAsync();
+    await DbSeeder.SeedAsync(db);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
