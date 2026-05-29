@@ -10,4 +10,5 @@ public class TransactionFilter
     public DateTime? To { get; set; }
     public int? MaxAmount { get; set; }
     public TransactionType? Type { get; set; }
+    public string? Description { get; set; }
 }

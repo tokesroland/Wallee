@@ -96,6 +96,7 @@
     private async Task Save()
     {
         if (model.Amount <= 0 || model.WalletID == 0) return;
+        if (model.Currency == "" || model.Currency.Length < 3 || model.Currency.Length > 3) return;
         await OnSave.InvokeAsync(model);
     }
 }

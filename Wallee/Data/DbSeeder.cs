@@ -10,9 +10,7 @@ public static class DbSeeder
         if (!await db.Wallets.AnyAsync())
         {
             db.Wallets.AddRange(
-                new Wallet { Name = "Napi kiadások", Description = "Mindennapi költések", Balance = 0 },
-                new Wallet { Name = "Utazás", Description = "Nyaralás", Balance = 0 },
-                new Wallet { Name = "Megtakarítás", Description = "Hosszútávú cél", Balance = 0 }
+                new Wallet {ID = 1, Name = "Fő számla", Description = "Alapértelmezett", Balance = 0 }
             );
         }
 

@@ -22,6 +22,7 @@ public class TransactionService(IDbContextFactory<WalleeDbContext> factory) : IT
         if (filter.To is DateTime to) q = q.Where(t => t.Date < to.Date.AddDays(1));
         if (filter.MaxAmount is int max) q = q.Where(t => t.Amount <= max);
         if (filter.Type is TransactionType type) q = q.Where(t => t.Type == type);
+        if (filter.Description is string desc) q = q.Where(t => t.Description.Contains(desc));
 
         return await q.OrderByDescending(t => t.Date).ToListAsync();
     }

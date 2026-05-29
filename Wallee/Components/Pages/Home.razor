@@ -92,6 +92,10 @@
                     <option value="@TransactionType.transfer">Átutalás</option>
                 </select>
 
+                <label>Leírás:</label>
+                <input style="border-radius: 10px; border:0.5px" placeholder=" Tartalom..." type="text" @bind="filterDesc" @bind:after="ApplyFilters" />
+
+
                 <button class="btn btn-ghost" @onclick="ClearFilters">Törlés</button>
                 <button class="btn btn-primary" @onclick="OpenModal">+ Rögzítés</button>
             </div>
@@ -161,7 +165,7 @@
     private List<Transaction> transactions = new();
 
     // napi keret (phase 1: csak munkamenetre, nem perzisztens)
-    private int dailyBudget = 5000;
+    private int dailyBudget;
     private int spentToday;
 
     // egyenleg kártya
@@ -179,6 +183,7 @@
     private DateTime? filterTo;
     private int filterMaxAmount = 100000;
     private TransactionType? filterType;
+    private string? filterDesc;
 
     private bool modalVisible;
 
@@ -211,7 +216,8 @@
             From = filterFrom,
             To = filterTo,
             MaxAmount = filterMaxAmount,
-            Type = filterType
+            Type = filterType,
+            Description = filterDesc
         });
     }
 
@@ -236,6 +242,7 @@
         filterTo = null;
         filterMaxAmount = 100000;
         filterType = null;
+        filterDesc = null;
         await ApplyFilters();
     }
 
@@ -256,7 +263,7 @@
 
     private int BudgetPct => dailyBudget <= 0
         ? 0
-        : Math.Clamp((int)Math.Round((double)spentToday / dailyBudget * 100), 0, 100);
+        : Math.Clamp((int)Math.Round((double)spentToday / dailyBudget * 100), 0, 99999);
 
     private string SelectedWalletLabel => selectedWalletId == 0
         ? "Összes tárca"
