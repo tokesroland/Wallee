@@ -18,6 +18,7 @@ builder.Services.AddDbContextFactory<WalleeDbContext>(options =>
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IExpectedTransactionService, ExpectedTransactionService>();
 
 var app = builder.Build();
 

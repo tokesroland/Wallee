@@ -1,0 +1,62 @@
+﻿<div class="expected-card @(IsOverdue ? "overdue" : "")">
+
+    <div class="card-actions">
+        <button class="card-icon-btn" title="Módosítás" @onclick="OnEdit">✎</button>
+        <button class="card-icon-btn danger" title="Kihagyás" @onclick="OnSkip">✕</button>
+    </div>
+
+    <span class="category-badge @BadgeCss">@CategoryLabel</span>
+
+    <div class="card-amount @AmountClass">@AmountSign@FormatFt(Item.Amount)</div>
+    <div class="card-title">@Item.Title</div>
+
+    @if (!string.IsNullOrWhiteSpace(Item.Description))
+    {
+        <div class="card-desc">@Item.Description</div>
+    }
+
+    <div class="card-meta">
+        <span>Jóváírás @Item.ExpectedDate.ToString("MM.dd")</span>
+        <span class="meta-dot">·</span>
+        <span>@RecurrenceLabel</span>
+    </div>
+
+    @if (IsOverdue)
+    {
+        <span class="overdue-badge">@OverdueDays napja esedékes</span>
+    }
+
+    <button class="approve-btn" @onclick="OnApprove">Elfogadás</button>
+</div>
+
+@code {
+    [Parameter] public ExpectedTransaction Item { get; set; } = null!;
+    [Parameter] public EventCallback OnApprove { get; set; }
+    [Parameter] public EventCallback OnSkip { get; set; }
+    [Parameter] public EventCallback OnEdit { get; set; }
+
+    private bool IsOverdue => Item.Status == ExpectedStatus.pending && Item.ExpectedDate.Date < DateTime.Today;
+    private int OverdueDays => (DateTime.Today - Item.ExpectedDate.Date).Days;
+
+    private bool IsIncome => Item.Type == ExpectedTransactionType.income;
+
+    private string AmountClass => IsIncome ? "amount-positive" : "amount-negative";
+    private string AmountSign => IsIncome ? "+" : "−";
+    private string BadgeCss => IsIncome ? "income" : "";
+    private string CategoryLabel => Item.Category?.CategoryName ?? "Egyéb";
+
+    private string RecurrenceLabel => Item.Recurrence switch
+    {
+        RecurrenceType.once => "Várható",
+        RecurrenceType.daily => "Napi",
+        RecurrenceType.weekly => "Heti",
+        RecurrenceType.monthly => "Fix",
+        RecurrenceType.yearly => "Éves",
+        _ => "Várható"
+    };
+
+    private static readonly System.Globalization.NumberFormatInfo Huf =
+        new() { NumberGroupSeparator = " ", NumberDecimalDigits = 0 };
+
+    private static string FormatFt(int amount) => amount.ToString("N0", Huf) + " Ft";
+}

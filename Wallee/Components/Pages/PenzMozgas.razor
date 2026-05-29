@@ -1,0 +1,402 @@
+﻿@page "/penzmozgas"
+@rendermode InteractiveServer
+@inject IExpectedTransactionService ExpectedService
+@inject ICategoryService CategoryService
+
+<PageTitle>Pénzmozgás</PageTitle>
+
+<main>
+    <!-- 1. Összesítő kártya -->
+    <section class="summary-card">
+        <div class="summary-main">
+            <div class="summary-head">
+                <p class="summary-title">Várható jövedelem</p>
+                <p class="summary-sub">Függőben lévő tételek alapján · @MonthLabel</p>
+            </div>
+            <span class="summary-badge">@(summary?.Count ?? 0) függő tétel</span>
+        </div>
+
+        <div class="summary-net">
+            <p class="net-value @(NetClass)">@SignOf(Net)@FormatFt(Math.Abs(Net))</p>
+            <p class="net-label">Nettó várható változás a hónap végéig</p>
+        </div>
+
+        <div class="summary-breakdown">
+            <div class="bd-item">
+                <p class="bd-label">Bejövő</p>
+                <p class="bd-value income">+@FormatFt(summary?.TotalIncome ?? 0)</p>
+                <p class="bd-count">@(summary?.IncomeCount ?? 0) tétel</p>
+            </div>
+            <div class="bd-divider"></div>
+            <div class="bd-item">
+                <p class="bd-label">Kimenő</p>
+                <p class="bd-value expense">−@FormatFt(summary?.TotalExpense ?? 0)</p>
+                <p class="bd-count">@(summary?.ExpenseCount ?? 0) tétel</p>
+            </div>
+            <div class="bd-divider"></div>
+            <div class="bd-item bd-next">
+                <p class="bd-label">Következő esemény · @NextWhen</p>
+                @if (summary?.NextEvent is ExpectedTransaction ev)
+                {
+                    <p class="bd-next-row">
+                        <span class="bd-next-title">@ev.Title</span>
+                        <span class="bd-next-dot">·</span>
+                        <span class="bd-next-date">@ev.ExpectedDate.ToString("MM.dd")</span>
+                    </p>
+                    <p class="bd-value @(ev.Type == ExpectedTransactionType.income ? "income" : "expense")">
+                        @SignOf(ev.Type == ExpectedTransactionType.income ? ev.Amount : -ev.Amount)@FormatFt(ev.Amount)
+                    </p>
+                }
+                else
+                {
+                    <p class="bd-next-row"><span class="bd-next-title">Nincs közelgő tétel</span></p>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Függő pénzmozgások — megosztott szűrő + kártyasorok -->
+    <section class="section-block">
+        <div class="block-head">
+            <div>
+                <h2 class="block-title">Függő pénzmozgások</h2>
+                <p class="block-sub">Szűrd, majd fogadd el vagy módosítsd a tételeket</p>
+            </div>
+        </div>
+
+        <!-- Megosztott szűrő (a kártyasorokra és a táblázatra is hat) -->
+        <div class="filter-bar">
+            <select @bind="filterCategoryId" @bind:after="ApplyFilters">
+                <option value="0">Összes kategória</option>
+                @foreach (var c in categories)
+                {
+                    <option value="@c.ID">@c.CategoryName</option>
+                }
+            </select>
+
+            <input class="search-input" type="text" placeholder="Név vagy leírás…"
+                   @bind="filterSearch" @bind:after="ApplyFilters" />
+
+            <label>Tól:</label>
+            <input type="date" @bind="filterFrom" @bind:after="ApplyFilters" />
+
+            <label>Ig:</label>
+            <input type="date" @bind="filterTo" @bind:after="ApplyFilters" />
+
+            <div class="range-wrap">
+                <label>Max összeg:</label>
+                <input type="range" min="0" max="@MaxAmountCeiling" step="5000"
+                       @bind="filterMaxAmount" @bind:after="ApplyFilters" />
+                <span class="range-value">@FormatFt(filterMaxAmount)</span>
+            </div>
+
+            <button class="btn btn-ghost" @onclick="ClearFilters">Szűrők törlése</button>
+        </div>
+
+        <!-- 2a. Jövedelem kártyasor -->
+        <div class="card-row">
+            <div class="row-header">
+                <span class="row-title">Jövedelem</span>
+                <span class="row-count">@incomeItems.Count tétel</span>
+                <span class="row-total income">+@FormatFt(IncomeShownTotal)</span>
+                <button class="btn btn-primary row-add" @onclick="OpenCreate">+ Új rögzítése</button>
+            </div>
+            @if (incomeItems.Count == 0)
+            {
+                <p class="row-empty">Nincs megjeleníthető függő jövedelem.</p>
+            }
+            else
+            {
+                <div class="cards-scroll">
+                    @foreach (var item in incomeItems)
+                    {
+                        <ExpectedCard Item="item"
+                                      OnApprove="@(() => HandleApprove(item.ID))"
+                                      OnSkip="@(() => HandleSkip(item.ID))"
+                                      OnEdit="@(() => OpenEdit(item))" />
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- 2b. Kiadás kártyasor -->
+        <div class="card-row">
+            <div class="row-header">
+                <span class="row-title">Kiadások</span>
+                <span class="row-count">@expenseItems.Count tétel</span>
+                <span class="row-total expense">−@FormatFt(ExpenseShownTotal)</span>
+            </div>
+            @if (expenseItems.Count == 0)
+            {
+                <p class="row-empty">Nincs megjeleníthető függő kiadás.</p>
+            }
+            else
+            {
+                <div class="cards-scroll">
+                    @foreach (var item in expenseItems)
+                    {
+                        <ExpectedCard Item="item"
+                                      OnApprove="@(() => HandleApprove(item.ID))"
+                                      OnSkip="@(() => HandleSkip(item.ID))"
+                                      OnEdit="@(() => OpenEdit(item))" />
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- 3. Táblázatos nézet -->
+    <section class="table-section">
+        <div class="card">
+            <div class="table-header">
+                <div>
+                    <h2 class="block-title">Függőben lévő tételek</h2>
+                    <p class="block-sub">Táblázatos nézet — @tableItems.Count tétel</p>
+                </div>
+                <div class="type-toggle">
+                    <button class="@(tableTypeFilter == null ? "active" : "")"
+                            @onclick="@(() => SetTableType(null))">Mind</button>
+                    <button class="@(tableTypeFilter == ExpectedTransactionType.income ? "active" : "")"
+                            @onclick="@(() => SetTableType(ExpectedTransactionType.income))">Bevétel</button>
+                    <button class="@(tableTypeFilter == ExpectedTransactionType.expense ? "active" : "")"
+                            @onclick="@(() => SetTableType(ExpectedTransactionType.expense))">Kiadás</button>
+                </div>
+            </div>
+
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Jóváírás</th>
+                        <th>Tétel</th>
+                        <th>Kategória</th>
+                        <th>Típus</th>
+                        <th>Tárca</th>
+                        <th>Összeg</th>
+                        <th>Állapot</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (tableItems.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:14px">
+                                Nincs találat.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var t in tableItems)
+                        {
+                            <tr class="@(t.Status == ExpectedStatus.pending && t.ExpectedDate.Date < DateTime.Today ? "row-overdue" : "")">
+                                <td>@t.ExpectedDate.ToString("yyyy.MM.dd")</td>
+                                <td>
+                                    <div class="cell-title">@t.Title</div>
+                                    @if (!string.IsNullOrWhiteSpace(t.Description))
+                                    {
+                                        <div class="cell-desc">@t.Description</div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (t.Category is not null)
+                                    {
+                                        <span class="category-badge @(t.Type == ExpectedTransactionType.income ? "income" : "")">@t.Category.CategoryName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="wallet-tag">—</span>
+                                    }
+                                </td>
+                                <td><span class="wallet-tag">@(t.Type == ExpectedTransactionType.income ? "Bevétel" : "Kiadás")</span></td>
+                                <td><span class="wallet-tag">@t.Wallet?.Name</span></td>
+                                <td class="@(t.Type == ExpectedTransactionType.income ? "amount-positive" : "amount-negative")">
+                                    @(t.Type == ExpectedTransactionType.income ? "+" : "−")@FormatFt(t.Amount)
+                                </td>
+                                <td><span class="status-pill @StatusCss(t.Status)">@StatusLabel(t.Status)</span></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<ExpectedTransactionModal Visible="showModal"
+                          Categories="categories"
+                          IsEdit="isEdit"
+                          EditItem="editTarget"
+                          OnClose="CloseModal"
+                          OnSave="HandleModalSave" />
+
+@code {
+    private const int MaxAmountCeiling = 1_000_000;
+
+    private static readonly System.Globalization.CultureInfo HuCulture = new("hu-HU");
+    private static readonly System.Globalization.NumberFormatInfo Huf =
+        new() { NumberGroupSeparator = " ", NumberDecimalDigits = 0 };
+
+    // adatok
+    private List<Category> categories = new();
+    private List<ExpectedTransaction> incomeItems = new();
+    private List<ExpectedTransaction> expenseItems = new();
+    private List<ExpectedTransaction> tableItems = new();
+    private MonthlySummaryDto? summary;
+
+    // megosztott szűrő (0 = összes; üres = nincs)
+    private int filterCategoryId;
+    private string? filterSearch;
+    private DateTime? filterFrom;
+    private DateTime? filterTo;
+    private int filterMaxAmount = MaxAmountCeiling;
+
+    // csak a táblázatra ható típus kapcsoló
+    private ExpectedTransactionType? tableTypeFilter;
+
+    // modal állapot
+    private bool showModal;
+    private bool isEdit;
+    private ExpectedTransaction? editTarget;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // FONTOS: ha a meglévő ICategoryService-ben más a metódus neve
+        // (pl. GetAllAsync / GetCategoriesAsync), itt írd át rá ezt az egy hívást.
+        categories = await CategoryService.GetActiveAsync();
+        await LoadDataAsync();
+    }
+
+    private ExpectedTransactionFilter BuildFilter(StatusViewMode mode, ExpectedTransactionType? type) => new(
+        TypeFilter: type,
+        CategoryID: filterCategoryId == 0 ? null : filterCategoryId,
+        DateFrom: filterFrom,
+        DateTo: filterTo,
+        MaxAmount: filterMaxAmount >= MaxAmountCeiling ? null : filterMaxAmount,
+        TitleSearch: filterSearch,
+        StatusMode: mode
+    );
+
+    private async Task LoadDataAsync()
+    {
+        summary = await ExpectedService.GetMonthlySummaryAsync();
+
+        // kártyák: csak pending, összeg szerint csökkenő
+        incomeItems = (await ExpectedService.GetAllAsync(
+                BuildFilter(StatusViewMode.PendingOnly, ExpectedTransactionType.income)))
+            .OrderByDescending(i => i.Amount).ToList();
+
+        expenseItems = (await ExpectedService.GetAllAsync(
+                BuildFilter(StatusViewMode.PendingOnly, ExpectedTransactionType.expense)))
+            .OrderByDescending(i => i.Amount).ToList();
+
+        // táblázat: minden státusz, dátum szerint növekvő (a service rendezi)
+        tableItems = await ExpectedService.GetAllAsync(
+            BuildFilter(StatusViewMode.All, tableTypeFilter));
+    }
+
+    private async Task ApplyFilters() => await LoadDataAsync();
+
+    private async Task SetTableType(ExpectedTransactionType? t)
+    {
+        tableTypeFilter = t;
+        tableItems = await ExpectedService.GetAllAsync(BuildFilter(StatusViewMode.All, tableTypeFilter));
+    }
+
+    private async Task ClearFilters()
+    {
+        filterCategoryId = 0;
+        filterSearch = null;
+        filterFrom = null;
+        filterTo = null;
+        filterMaxAmount = MaxAmountCeiling;
+        await LoadDataAsync();
+    }
+
+    private async Task HandleApprove(int id)
+    {
+        await ExpectedService.ApproveAsync(id);
+        await LoadDataAsync();
+    }
+
+    private async Task HandleSkip(int id)
+    {
+        await ExpectedService.SkipAsync(id);
+        await LoadDataAsync();
+    }
+
+    private void OpenCreate()
+    {
+        isEdit = false;
+        editTarget = null;
+        showModal = true;
+    }
+
+    private void OpenEdit(ExpectedTransaction item)
+    {
+        isEdit = true;
+        editTarget = item;
+        showModal = true;
+    }
+
+    private void CloseModal() => showModal = false;
+
+    private async Task HandleModalSave(ExpectedTransactionCreateDto dto)
+    {
+        if (!isEdit || editTarget is null)
+        {
+            await ExpectedService.CreateAsync(dto);
+        }
+        else
+        {
+            await ExpectedService.UpdateAsync(editTarget.ID, new ExpectedTransactionUpdateDto(
+                dto.Title, dto.Description, dto.Amount, dto.CategoryID,
+                dto.Recurrence, dto.RecurrenceDay, dto.ExpectedDate));
+        }
+
+        showModal = false;
+        await LoadDataAsync();
+    }
+
+    // ── számított értékek ──
+    private int Net => summary?.Net ?? 0;
+    private int IncomeShownTotal => incomeItems.Sum(i => i.Amount);
+    private int ExpenseShownTotal => expenseItems.Sum(i => i.Amount);
+
+    private string NetClass => Net >= 0 ? "positive" : "negative";
+
+    private string MonthLabel => DateTime.Now.ToString("yyyy. MMMM", HuCulture);
+
+    private string NextWhen
+    {
+        get
+        {
+            if (summary?.NextEvent is not ExpectedTransaction ev) return "—";
+            var days = (ev.ExpectedDate.Date - DateTime.Today).Days;
+            return days switch
+            {
+                < 0 => $"{-days} napja esedékes",
+                0 => "ma esedékes",
+                1 => "holnap",
+                _ => $"{days} nap múlva"
+            };
+        }
+    }
+
+    private static string SignOf(int amount) => amount >= 0 ? "+" : "−";
+
+    private static string FormatFt(int amount) => Math.Abs(amount).ToString("N0", Huf) + " Ft";
+
+    private static string StatusCss(ExpectedStatus s) => s switch
+    {
+        ExpectedStatus.approved => "approved",
+        ExpectedStatus.skipped => "skipped",
+        _ => "pending"
+    };
+
+    private static string StatusLabel(ExpectedStatus s) => s switch
+    {
+        ExpectedStatus.approved => "Jóváírva",
+        ExpectedStatus.skipped => "Kihagyva",
+        _ => "Függőben"
+    };
+}

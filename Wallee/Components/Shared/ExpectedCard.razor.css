@@ -1,0 +1,154 @@
+.expected-card {
+    min-width: 230px;
+    max-width: 250px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    .expected-card:hover {
+        border-color: rgba(58, 63, 88, 0.22);
+        box-shadow: 0 4px 14px rgba(58, 63, 88, 0.06);
+    }
+
+    .expected-card.overdue {
+        border-color: rgba(238, 106, 89, 0.45);
+    }
+
+.card-actions {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    display: flex;
+    gap: 4px;
+    opacity: 0.55;
+    transition: opacity 0.15s;
+}
+
+.expected-card:hover .card-actions {
+    opacity: 1;
+}
+
+.card-icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    transition: background 0.15s, color 0.15s;
+}
+
+    .card-icon-btn:hover {
+        background: rgba(58, 63, 88, 0.08);
+        color: var(--text-primary);
+    }
+
+    .card-icon-btn.danger:hover {
+        background: rgba(238, 106, 89, 0.1);
+        color: var(--coral);
+    }
+
+.category-badge {
+    align-self: flex-start;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 9px;
+    border-radius: 99px;
+    background: var(--cream);
+    color: var(--navy);
+}
+
+    .category-badge.income {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+.card-amount {
+    font-family: "DM Serif Display", serif;
+    font-size: 26px;
+    line-height: 1.1;
+    margin-top: 0.35rem;
+    font-weight: 400;
+}
+
+.amount-positive {
+    color: #2e7d32;
+}
+
+.amount-negative {
+    color: var(--coral);
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.card-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+.meta-dot {
+    color: var(--text-muted);
+}
+
+.overdue-badge {
+    align-self: flex-start;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: rgba(238, 106, 89, 0.12);
+    color: var(--coral);
+    margin-top: 0.1rem;
+}
+
+.approve-btn {
+    width: 100%;
+    margin-top: auto;
+    padding: 8px;
+    background: var(--navy);
+    color: var(--cream);
+    border: none;
+    border-radius: 8px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+    .approve-btn:hover {
+        opacity: 0.88;
+    }
+
+    .approve-btn:active {
+        transform: scale(0.98);
+    }

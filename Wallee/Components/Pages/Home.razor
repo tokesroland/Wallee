@@ -78,7 +78,7 @@
 
                 <div class="range-wrap">
                     <label>Max összeg:</label>
-                    <input type="range" min="0" max="100000" step="1000"
+                    <input type="range" min="0" max="1000000" step="1000"
                            @bind="filterMaxAmount" @bind:after="ApplyFilters" />
                     <span style="font-size:12px;color:var(--text-secondary);min-width:60px">
                         @FormatFt(filterMaxAmount)
@@ -181,7 +181,7 @@
     private int filterCategoryId;
     private DateTime? filterFrom;
     private DateTime? filterTo;
-    private int filterMaxAmount = 100000;
+    private int filterMaxAmount = 1000000;
     private TransactionType? filterType;
     private string? filterDesc;
 
@@ -240,7 +240,7 @@
         filterCategoryId = 0;
         filterFrom = null;
         filterTo = null;
-        filterMaxAmount = 100000;
+        filterMaxAmount = 1000000;
         filterType = null;
         filterDesc = null;
         await ApplyFilters();

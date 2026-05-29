@@ -12,8 +12,8 @@ using Wallee.Data;
 namespace Wallee.Migrations
 {
     [DbContext(typeof(WalleeDbContext))]
-    [Migration("20260528222341_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260529185335_AddExpectedTransaction")]
+    partial class AddExpectedTransaction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,6 +44,66 @@ namespace Wallee.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Wallee.Models.ExpectedTransaction", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("ExpectedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("LinkedTransactionID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Recurrence")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("RecurrenceDay")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("WalletID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("LinkedTransactionID");
+
+                    b.HasIndex("WalletID");
+
+                    b.ToTable("ExpectedTransactions");
                 });
 
             modelBuilder.Entity("Wallee.Models.Transaction", b =>
@@ -112,6 +172,31 @@ namespace Wallee.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Wallets");
+                });
+
+            modelBuilder.Entity("Wallee.Models.ExpectedTransaction", b =>
+                {
+                    b.HasOne("Wallee.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Wallee.Models.Transaction", "LinkedTransaction")
+                        .WithMany()
+                        .HasForeignKey("LinkedTransactionID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Wallee.Models.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("LinkedTransaction");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("Wallee.Models.Transaction", b =>

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wallee.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddExpectedTransaction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -85,6 +85,69 @@ namespace Wallee.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "ExpectedTransactions",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Title = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Amount = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    WalletID = table.Column<int>(type: "int", nullable: false),
+                    CategoryID = table.Column<int>(type: "int", nullable: true),
+                    Status = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Recurrence = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RecurrenceDay = table.Column<int>(type: "int", nullable: true),
+                    ExpectedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    LinkedTransactionID = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExpectedTransactions", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ExpectedTransactions_Categories_CategoryID",
+                        column: x => x.CategoryID,
+                        principalTable: "Categories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_ExpectedTransactions_Transactions_LinkedTransactionID",
+                        column: x => x.LinkedTransactionID,
+                        principalTable: "Transactions",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_ExpectedTransactions_Wallets_WalletID",
+                        column: x => x.WalletID,
+                        principalTable: "Wallets",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExpectedTransactions_CategoryID",
+                table: "ExpectedTransactions",
+                column: "CategoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExpectedTransactions_LinkedTransactionID",
+                table: "ExpectedTransactions",
+                column: "LinkedTransactionID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExpectedTransactions_WalletID",
+                table: "ExpectedTransactions",
+                column: "WalletID");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_CategoryID",
                 table: "Transactions",
@@ -99,6 +162,9 @@ namespace Wallee.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ExpectedTransactions");
+
             migrationBuilder.DropTable(
                 name: "Transactions");
 

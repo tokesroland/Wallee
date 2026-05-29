@@ -11,6 +11,8 @@
     z-index: 100;
 }
 
+    /* A NavLink <a>-ként renderelődik, ezért az <a> és a <button> is ugyanúgy stílusozva */
+    .navbar a,
     .navbar button {
         background: transparent;
         border: none;
@@ -23,13 +25,17 @@
         cursor: pointer;
         transition: color 0.2s, background 0.2s;
         letter-spacing: 0.01em;
+        text-decoration: none;
+        line-height: 1.6;
     }
 
+        .navbar a:hover,
         .navbar button:hover {
             color: var(--cream);
             background: rgba(255, 255, 255, 0.08);
         }
 
+        .navbar a.active,
         .navbar button.active {
             color: var(--cream);
             background: rgba(255, 255, 255, 0.12);
