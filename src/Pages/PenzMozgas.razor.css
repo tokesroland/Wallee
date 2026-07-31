@@ -1,0 +1,341 @@
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ── 1. Összesítő kártya (navy) ── */
+.summary-card {
+    background: var(--navy);
+    color: var(--cream);
+    border-radius: 20px;
+    padding: 1.75rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+}
+
+.summary-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.summary-title {
+    font-family: "DM Serif Display", serif;
+    font-size: 20px;
+    color: var(--cream);
+}
+
+.summary-sub {
+    font-size: 13px;
+    color: rgba(236, 230, 205, 0.6);
+    margin-top: 3px;
+}
+
+.summary-badge {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--cream);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 13px;
+    border-radius: 99px;
+    white-space: nowrap;
+}
+
+.net-value {
+    font-family: "DM Serif Display", serif;
+    font-size: 42px;
+    line-height: 1;
+}
+
+    .net-value.positive {
+        color: #8fd19e;
+    }
+
+    .net-value.negative {
+        color: #f6a290;
+    }
+
+.net-label {
+    font-size: 12px;
+    color: rgba(236, 230, 205, 0.55);
+    margin-top: 6px;
+}
+
+.summary-breakdown {
+    display: flex;
+    align-items: stretch;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.25rem;
+}
+
+.bd-item {
+    flex: 1;
+    min-width: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bd-next {
+    flex: 1.5;
+    min-width: 180px;
+}
+
+.bd-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(236, 230, 205, 0.5);
+}
+
+.bd-value {
+    font-family: "DM Serif Display", serif;
+    font-size: 19px;
+    color: var(--cream);
+}
+
+    .bd-value.income {
+        color: #8fd19e;
+    }
+
+    .bd-value.expense {
+        color: #f6a290;
+    }
+
+.bd-count {
+    font-size: 11px;
+    color: rgba(236, 230, 205, 0.5);
+}
+
+.bd-divider {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    align-self: stretch;
+}
+
+.bd-next-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--cream);
+}
+
+.bd-next-title {
+    font-weight: 500;
+}
+
+.bd-next-dot,
+.bd-next-date {
+    color: rgba(236, 230, 205, 0.6);
+}
+
+/* ── 2. Szekció fejlécek + kártyasorok ── */
+.section-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.block-title {
+    font-family: "DM Serif Display", serif;
+    font-size: 21px;
+    color: var(--text-primary);
+}
+
+.block-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+/* megosztott szűrő extra elemei (a .filter-bar maga globális) */
+.search-input {
+    min-width: 175px;
+}
+
+.range-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.range-value {
+    font-size: 13px;
+    color: var(--text-secondary);
+    min-width: 78px;
+    text-align: right;
+}
+
+.filter-bar label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+    .btn-ghost:hover {
+        background: var(--navy-light);
+        color: var(--text-primary);
+    }
+
+.card-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.row-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.row-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.row-count {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.row-total {
+    font-family: "DM Serif Display", serif;
+    font-size: 16px;
+    margin-left: 2px;
+}
+
+    .row-total.income {
+        color: #2e7d32;
+    }
+
+    .row-total.expense {
+        color: var(--coral);
+    }
+
+.row-add {
+    margin-left: auto;
+}
+
+.row-empty {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 0.5rem 0 0.75rem;
+}
+
+.cards-scroll {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    align-items: stretch;
+    scrollbar-width: thin;
+}
+
+/* ── 3. Táblázat ── */
+.table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.5rem;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.1rem;
+}
+
+.type-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--navy-light);
+    border-radius: 8px;
+    padding: 3px;
+}
+
+    .type-toggle button {
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        padding: 5px 14px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: background 0.15s, color 0.15s;
+    }
+
+        .type-toggle button.active {
+            background: var(--surface);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(58, 63, 88, 0.1);
+        }
+
+.cell-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.cell-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.wallet-tag {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--navy-light);
+    padding: 2px 9px;
+    border-radius: 6px;
+}
+
+.status-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 10px;
+    border-radius: 99px;
+}
+
+    .status-pill.pending {
+        background: rgba(249, 172, 103, 0.18);
+        color: #b5701f;
+    }
+
+    .status-pill.approved {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-pill.skipped {
+        background: var(--navy-light);
+        color: var(--text-muted);
+    }
+
+.row-overdue {
+    background: rgba(238, 106, 89, 0.04);
+}

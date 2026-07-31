@@ -1,0 +1,198 @@
+﻿@if (Visible)
+{
+    <div class="modal-backdrop" @onclick="OnClose"></div>
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="text-lg font-semibold text-white">@HeaderText</h3>
+            <button class="modal-close" @onclick="OnClose">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="m-group">
+                <label class="text-sm text-slate-400">Cím</label>
+                <input type="text" placeholder="pl. Munkabér" @bind="title" disabled="@ReadOnly" />
+            </div>
+
+            <div class="m-group">
+                <label class="text-sm text-slate-400">Leírás</label>
+                <input type="text" placeholder="pl. Havi nettó fizetés — Acme Kft." @bind="description" disabled="@ReadOnly" />
+            </div>
+
+            <div class="m-group">
+                <label class="text-sm text-slate-400">Összeg (Ft)</label>
+                <input type="number" min="1" @bind="amount" disabled="@ReadOnly" />
+            </div>
+
+            <div class="m-group">
+                <label class="text-sm text-slate-400">Típus</label>
+                <select @bind="type" disabled="@(ReadOnly || IsEdit)">
+                    <option value="@ExpectedTransactionType.income">Jövedelem</option>
+                    <option value="@ExpectedTransactionType.expense">Kiadás</option>
+                </select>
+                @if (IsEdit && !ReadOnly)
+                {
+                    <span class="m-hint">A típus módosításhoz hozz létre új tételt.</span>
+                }
+            </div>
+
+            <div class="m-group">
+                <label class="text-sm text-slate-400">Kategória (opcionális)</label>
+                <select @bind="categoryId" disabled="@ReadOnly">
+                    <option value="0">— nincs —</option>
+                    @foreach (var c in Categories)
+                    {
+                        <option value="@c.ID">@c.CategoryName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="m-group">
+                <label class="text-sm text-slate-400">Várható dátum</label>
+                <input type="date" @bind="expectedDate" disabled="@ReadOnly" />
+            </div>
+
+            <div class="m-group">
+                <label class="text-sm text-slate-400">Ismétlődés</label>
+                <select @bind="recurrence" disabled="@ReadOnly">
+                    <option value="@RecurrenceType.once">Egyszeri</option>
+                    <option value="@RecurrenceType.weekly">Heti</option>
+                    <option value="@RecurrenceType.monthly">Havi</option>
+                    <option value="@RecurrenceType.yearly">Éves</option>
+                </select>
+            </div>
+
+            @if (recurrence == RecurrenceType.monthly)
+            {
+                <div class="m-group">
+                    <label class="text-sm text-slate-400">A hónap napja</label>
+                    <input type="number" min="1" max="31" @bind="recurrenceDay" disabled="@ReadOnly" />
+                </div>
+            }
+            else if (recurrence == RecurrenceType.weekly)
+            {
+                <div class="m-group">
+                    <label class="text-sm text-slate-400">A hét napja</label>
+                    <select @bind="recurrenceDay" disabled="@ReadOnly">
+                        <option value="1">Hétfő</option>
+                        <option value="2">Kedd</option>
+                        <option value="3">Szerda</option>
+                        <option value="4">Csütörtök</option>
+                        <option value="5">Péntek</option>
+                        <option value="6">Szombat</option>
+                        <option value="7">Vasárnap</option>
+                    </select>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="m-error">@error</div>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-outline" @onclick="OnClose">@(ReadOnly ? "Bezárás" : "Mégse")</button>
+            @if (!ReadOnly)
+            {
+                <button class="btn btn-primary" @onclick="Save">Mentés</button>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public List<Category> Categories { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public ExpectedTransaction? EditItem { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<ExpectedTransactionCreateDto> OnSave { get; set; }
+
+    private string title = "";
+    private string? description;
+    private int amount;
+    private ExpectedTransactionType type = ExpectedTransactionType.expense;
+    private int categoryId;                 // 0 = nincs
+    private DateTime expectedDate = DateTime.Today;
+    private RecurrenceType recurrence = RecurrenceType.once;
+    private int recurrenceDay;
+    private string? error;
+
+    private bool _wasVisible;
+
+    private bool ReadOnly => IsEdit && EditItem is not null && EditItem.Status != ExpectedStatus.pending;
+
+    private string HeaderText => !IsEdit
+        ? "Új pénzmozgás"
+        : ReadOnly ? "Pénzmozgás részletei" : "Pénzmozgás módosítása";
+
+    protected override void OnParametersSet()
+    {
+        if (Visible && !_wasVisible)
+        {
+            error = null;
+
+            if (IsEdit && EditItem is not null)
+            {
+                title = EditItem.Title;
+                description = EditItem.Description;
+                amount = EditItem.Amount;
+                type = EditItem.Type;
+                categoryId = EditItem.CategoryID ?? 0;
+                expectedDate = EditItem.ExpectedDate;
+                recurrence = EditItem.Recurrence;
+                recurrenceDay = EditItem.RecurrenceDay ?? expectedDate.Day;
+            }
+            else
+            {
+                title = "";
+                description = null;
+                amount = 0;
+                type = ExpectedTransactionType.expense;
+                categoryId = 0;
+                expectedDate = DateTime.Today;
+                recurrence = RecurrenceType.once;
+                recurrenceDay = DateTime.Today.Day;
+            }
+        }
+        _wasVisible = Visible;
+    }
+
+    private async Task Save()
+    {
+        error = null;
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            error = "A cím megadása kötelező.";
+            return;
+        }
+        if (amount < 1)
+        {
+            error = "Az összegnek legalább 1 Ft-nak kell lennie.";
+            return;
+        }
+
+        int? day = recurrence switch
+        {
+            RecurrenceType.monthly => Math.Clamp(recurrenceDay <= 0 ? expectedDate.Day : recurrenceDay, 1, 31),
+            RecurrenceType.weekly => recurrenceDay is >= 1 and <= 7 ? recurrenceDay : IsoWeekday(expectedDate),
+            _ => null
+        };
+
+        var dto = new ExpectedTransactionCreateDto(
+            Title: title.Trim(),
+            Description: string.IsNullOrWhiteSpace(description) ? null : description!.Trim(),
+            Amount: amount,
+            Type: type,
+            CategoryID: categoryId == 0 ? null : categoryId,
+            Recurrence: recurrence,
+            RecurrenceDay: day,
+            ExpectedDate: expectedDate
+        );
+
+        await OnSave.InvokeAsync(dto);
+    }
+
+    private static int IsoWeekday(DateTime d) => ((int)d.DayOfWeek + 6) % 7 + 1;
+}

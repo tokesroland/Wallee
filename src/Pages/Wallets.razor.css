@@ -1,0 +1,589 @@
+/* CSS for Wallets component */
+/* ── Design tokens ── */
+
+/* ── Layout ── */
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ── Card base ── */
+.card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+}
+
+.card-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.card-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+/* ── Buttons ── */
+.btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 5px 14px;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+    .btn-outline:hover {
+        background: rgba(0,0,0,0.04);
+    }
+
+.btn-primary {
+    background: var(--coral);
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        opacity: 0.88;
+    }
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+}
+
+    .btn-ghost:hover {
+        color: var(--text-primary);
+        background: rgba(0,0,0,0.04);
+    }
+
+.btn-danger {
+    background: transparent;
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.2);
+}
+
+    .btn-danger:hover {
+        background: rgba(192,57,43,0.06);
+    }
+
+/* ── Összesítő sáv ── */
+.summary-bar {
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.sum-item {
+    flex-shrink: 0;
+}
+
+.sum-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(236,230,205,0.5);
+    margin-bottom: 3px;
+}
+
+.sum-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--cream);
+    line-height: 1.1;
+}
+
+.sum-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(255,255,255,0.12);
+    flex-shrink: 0;
+}
+
+.alloc-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.alloc-fill {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+/* ── Tárca kártyák ── */
+.wallets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.wallet-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+    .wallet-card:hover {
+        border-color: rgba(58,63,88,0.22);
+    }
+
+    .wallet-card.selected {
+        border-color: var(--navy);
+        border-width: 2px;
+    }
+
+.wc-icon {
+    font-size: 22px;
+    margin-bottom: 0.75rem;
+}
+
+.wc-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.wc-amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.wc-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.wc-bar {
+    height: 3px;
+    border-radius: 99px;
+    margin-top: 1rem;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.wc-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+}
+
+.wallet-card-new {
+    border-style: dashed;
+    border-color: rgba(58,63,88,0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 150px;
+    color: var(--text-muted);
+    transition: border-color 0.2s, color 0.2s;
+}
+
+    .wallet-card-new:hover {
+        border-color: var(--navy);
+        color: var(--navy);
+    }
+
+    .wallet-card-new .plus-icon {
+        font-size: 28px;
+        font-weight: 300;
+        line-height: 1;
+    }
+
+    .wallet-card-new span {
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+/* ── Részletek panel ── */
+.detail-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.detail-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--navy-light);
+}
+
+    .detail-panel-header h3 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 17px;
+        font-weight: 400;
+        color: var(--text-primary);
+    }
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.detail-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+/* ── Szerkesztő oszlop ── */
+.edit-col {
+    padding: 1.5rem;
+    border-right: 1px solid var(--border);
+}
+
+.col-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+    .form-group label {
+        display: block;
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"] {
+        width: 100%;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        color: var(--text-primary);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 12px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+        .form-group input[type="text"]:focus {
+            border-color: var(--navy);
+        }
+
+.color-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.color-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+    .color-dot:hover {
+        transform: scale(1.15);
+    }
+
+    .color-dot.active {
+        border-color: var(--navy);
+    }
+
+.icon-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+    .icon-btn:hover {
+        background: var(--navy-light);
+    }
+
+    .icon-btn.active {
+        background: var(--navy);
+        border-color: var(--navy);
+    }
+
+/* ── Műveletek oszlop ── */
+.actions-col {
+    padding: 1.5rem;
+}
+
+.action-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.ac-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.ac-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.ac-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+    .ac-row input[type="number"] {
+        width: 120px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        color: var(--text-primary);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 10px;
+        outline: none;
+    }
+
+    .ac-row select {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        color: var(--text-primary);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 10px;
+        outline: none;
+    }
+
+/* ── Transactions section (copy) ── */
+.transactions-section .card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.transactions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+    .transactions-header h2 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 18px;
+        font-weight: 400;
+        color: var(--text-primary);
+    }
+
+.filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0.875rem 1.5rem;
+    background: var(--navy-light);
+    border-bottom: 1px solid var(--border);
+}
+
+    .filter-bar select,
+    .filter-bar input[type="date"] {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        color: var(--text-primary);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 10px;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+        .filter-bar select:hover,
+        .filter-bar input[type="date"]:hover {
+            border-color: rgba(58,63,88,0.25);
+        }
+
+    .filter-bar label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    .filter-bar .range-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .filter-bar input[type="range"] {
+        width: 90px;
+        accent-color: var(--coral);
+    }
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .transactions-table thead th {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        padding: 10px 1.5rem;
+        text-align: left;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+    }
+
+        .transactions-table thead th:last-child {
+            text-align: right;
+        }
+
+    .transactions-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+    }
+
+        .transactions-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .transactions-table tbody tr:hover {
+            background: var(--navy-light);
+        }
+
+    .transactions-table tbody td {
+        padding: 12px 1.5rem;
+        font-size: 14px;
+        color: var(--text-primary);
+    }
+
+        .transactions-table tbody td:last-child {
+            text-align: right;
+        }
+
+.category-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 9px;
+    border-radius: 99px;
+    background: var(--cream);
+    color: var(--navy);
+}
+
+    .category-badge.income {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .category-badge.transfer {
+        background: var(--navy-light);
+        color: var(--navy);
+    }
+
+.amount-negative {
+    color: var(--coral);
+    font-weight: 500;
+}
+
+.amount-positive {
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+.amount-transfer {
+    color: var(--navy);
+    font-weight: 500;
+}
+
+.wallet-tag {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+    .detail-body {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-col {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .summary-bar {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+}

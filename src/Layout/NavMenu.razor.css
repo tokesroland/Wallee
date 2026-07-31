@@ -1,0 +1,50 @@
+/* ── Navbar ── */
+.navbar {
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 2rem;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+    /* A NavLink <a>-ként renderelődik, ezért az <a> és a <button> is ugyanúgy stílusozva */
+    .navbar a,
+    .navbar button {
+        background: transparent;
+        border: none;
+        color: rgba(236, 230, 205, 0.6);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: color 0.2s, background 0.2s;
+        letter-spacing: 0.01em;
+        text-decoration: none;
+        line-height: 1.6;
+    }
+
+        .navbar a:hover,
+        .navbar button:hover {
+            color: var(--cream);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .navbar a.active,
+        .navbar button.active {
+            color: var(--cream);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+.navbar-brand {
+    font-family: "DM Serif Display", serif;
+    color: var(--cream);
+    font-size: 18px;
+    margin-right: 1.5rem;
+    letter-spacing: -0.01em;
+}

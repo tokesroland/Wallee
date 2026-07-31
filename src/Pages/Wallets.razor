@@ -1,0 +1,248 @@
+﻿@page "/wallets"
+@rendermode InteractiveServer
+
+<PageTitle>Wallets</PageTitle>
+
+<main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 bg-[#fcfbf7] px-4 py-6 lg:px-8">
+    <!-- Összesítő sáv -->
+    <div class="summary-bar">
+        <div class="sum-item">
+            <p class="sum-label">Összes egyenleg</p>
+            <p class="sum-value">110 000 Ft</p>
+        </div>
+        <div class="sum-divider"></div>
+        <div class="sum-item">
+            <p class="sum-label">Allokált</p>
+            <p class="sum-value">85 000 Ft</p>
+        </div>
+        <div class="alloc-track">
+            <div class="alloc-fill" style="width: 77%"></div>
+        </div>
+        <div class="sum-item">
+            <p class="sum-label">Szabad</p>
+            <p class="sum-value">25 000 Ft</p>
+        </div>
+    </div>
+
+    <!-- Tárca kártyák -->
+    <div class="wallets-grid">
+
+        <!-- Példa kártya (selected állapot) -->
+        <div class="wallet-card selected" @onclick="@(() => SelectWallet(0))">
+            <div class="wc-icon">🛒</div>
+            <div class="wc-name">Napi kiadások</div>
+            <div class="wc-amount">32 000 Ft</div>
+            <div class="wc-sub">Mindennapi költések</div>
+            <div class="wc-bar">
+                <div class="wc-bar-fill" style="width: 45%; background: var(--coral)"></div>
+            </div>
+        </div>
+
+        <div class="wallet-card" @onclick="@(() => SelectWallet(1))">
+            <div class="wc-icon">✈️</div>
+            <div class="wc-name">Utazás</div>
+            <div class="wc-amount">18 000 Ft</div>
+            <div class="wc-sub">Nyaralás 2024</div>
+            <div class="wc-bar">
+                <div class="wc-bar-fill" style="width: 30%; background: var(--amber)"></div>
+            </div>
+        </div>
+
+        <div class="wallet-card" @onclick="@(() => SelectWallet(2))">
+            <div class="wc-icon">🐷</div>
+            <div class="wc-name">Megtakarítás</div>
+            <div class="wc-amount">35 000 Ft</div>
+            <div class="wc-sub">Hosszútávú cél</div>
+            <div class="wc-bar">
+                <div class="wc-bar-fill" style="width: 60%; background: var(--navy)"></div>
+            </div>
+        </div>
+
+        <div class="wallet-card" @onclick="@(() => SelectWallet(3))">
+            <div class="wc-icon">💼</div>
+            <div class="wc-name">Új tárca</div>
+            <div class="wc-amount">0 Ft</div>
+            <div class="wc-sub"></div>
+            <div class="wc-bar">
+                <div class="wc-bar-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="wallet-card wallet-card-new">
+            <span class="plus-icon">+</span>
+            <span>Új tárca</span>
+        </div>
+    </div>
+
+    <!-- Részletek panel -->
+    <div class="detail-panel">
+
+        <div class="detail-panel-header">
+            <h3>🛒 Napi kiadások</h3>
+            <div class="header-actions">
+                <button class="btn btn-outline">Mentés</button>
+                <button class="btn btn-danger">Archiválás</button>
+            </div>
+        </div>
+
+        <div class="detail-body">
+
+            <!-- Bal: szerkesztő -->
+            <div class="edit-col">
+                <p class="col-title">Tárca beállításai</p>
+
+                <div class="form-group">
+                    <label>Név</label>
+                    <input type="text" value="Napi kiadások" />
+                </div>
+
+                <div class="form-group">
+                    <label>Leírás</label>
+                    <input type="text" value="Mindennapi költések" />
+                </div>
+
+                <div class="form-group">
+                    <label>Ikon</label>
+                    <div class="icon-picker">
+                        @foreach (var icon in icons)
+                        {
+                            <button class="icon-btn @(icon == selectedIcon ? "active" : "")"
+                                    @onclick="@(() => selectedIcon = icon)">
+                                @icon
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Szín</label>
+                    <div class="color-picker">
+                        @foreach (var color in colors)
+                        {
+                            <div class="color-dot @(color == selectedColor ? "active" : "")"
+                                 style="background: @color"
+                                 @onclick="@(() => selectedColor = color)">
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobb: műveletek -->
+            <div class="actions-col">
+                <p class="col-title">Műveletek</p>
+
+                <div class="action-card">
+                    <p class="ac-title">Feltöltés</p>
+                    <p class="ac-desc">Összeg áthelyezése a fő számláról ebbe a tárcába.</p>
+                    <div class="ac-row">
+                        <input type="number" placeholder="Összeg (Ft)" min="0" />
+                        <button class="btn btn-primary">Feltölt</button>
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <p class="ac-title">Kivét</p>
+                    <p class="ac-desc">Összeg visszautalása a fő számlára.</p>
+                    <div class="ac-row">
+                        <input type="number" placeholder="Összeg (Ft)" min="0" />
+                        <button class="btn btn-outline">Kivét</button>
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <p class="ac-title">Tárca → Tárca átutalás</p>
+                    <p class="ac-desc">Összeg áthelyezése egy másik tárcába.</p>
+                    <div class="ac-row">
+                        <input type="number" placeholder="Összeg (Ft)" min="0" />
+                        <select>
+                            <option value="">Cél tárca...</option>
+                            <option>Utazás</option>
+                            <option>Megtakarítás</option>
+                        </select>
+                        <button class="btn btn-outline">Küld</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tranzakciók -->
+    <section class="transactions-section">
+        <div class="card">
+
+            <div class="transactions-header">
+                <h2>Tranzakciók</h2>
+            </div>
+
+            <div class="filter-bar">
+                <select>
+                    <option value="">Összes kategória</option>
+                </select>
+
+                <label>Tól:</label>
+                <input type="date" />
+
+                <label>Ig:</label>
+                <input type="date" />
+
+                <div class="range-wrap">
+                    <label>Max összeg:</label>
+                    <input type="range" min="0" max="100000" step="1000" />
+                    <span style="font-size:12px;color:var(--text-secondary);min-width:60px">
+                        100 000 Ft
+                    </span>
+                </div>
+
+                <select>
+                    <option value="">Összes típus</option>
+                    <option value="expense">Kiadás</option>
+                    <option value="income">Bevétel</option>
+                    <option value="transfer">Átutalás</option>
+                </select>
+
+                <button class="btn btn-ghost">Törlés</button>
+                <button class="btn btn-primary">+ Rögzítés</button>
+            </div>
+
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Dátum</th>
+                        <th>Leírás</th>
+                        <th>Kategória</th>
+                        <th>Összeg</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:14px">
+                            Nincs találat.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+@code {
+    private int selectedWallet = 0;
+    private string selectedIcon = "🛒";
+    private string selectedColor = "#ee6a59";
+
+    private List<string> icons = new() {
+        "🛒", "✈️", "🐷", "🎮", "🌈", "🎁", "🏠", "🚗", "💼"
+    };
+
+    private List<string> colors = new() {
+        "#ee6a59", "#3a3f58", "#f9ac67", "#2e7d32",
+        "#1565c0", "#6a1b9a", "#ad1457", "#00838f"
+    };
+
+    private void SelectWallet(int index)
+    {
+        selectedWallet = index;
+    }
+}
