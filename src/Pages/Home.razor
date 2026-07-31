@@ -7,58 +7,59 @@
 <PageTitle>Home</PageTitle>
 
 <main class="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 bg-[#fcfbf7] px-4 py-6 lg:px-8">
-    
+
     <!-- Felső sáv: Napi keret (Teljes szélesség) -->
-    <section class="progress-section flex flex-wrap md:flex-nowrap items-center justify-between gap-6 w-full shadow-sm" style="background-color: var(--navy); border: none;">
-        <div class="flex items-center gap-4">
-            <p class="label" style="color: var(--cream);">Napi keret</p>
-            <div class="budget-row">
+    <section class="progress-section" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1.5rem; width:100%; background-color:var(--navy); border:none;">
+        <div style="display:flex; align-items:center; gap:1rem;">
+            <p class="label" style="color:var(--cream); white-space:nowrap;">Napi keret</p>
+            <div class="budget-row" style="display:flex; align-items:center; gap:6px;">
                 <input class="budget-input" type="number" min="0" step="500"
-                       value="@dailyBudget" @onchange="OnBudgetChanged" 
-                       style="color: var(--cream); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);" />
-                <span class="budget-ft" style="color: var(--cream);">Ft</span>
+                       value="@dailyBudget" @onchange="OnBudgetChanged"
+                       style="color:var(--cream); border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.1);" />
+                <span class="budget-ft" style="color:var(--cream);">Ft</span>
             </div>
         </div>
-        
-        <div class="flex-1 w-full min-w-[200px]">
-            <div class="progress-track w-full" style="background: rgba(255,255,255,0.2);">
-                <div class="progress-fill" style="width:@(BudgetPct)%; background: var(--coral);"></div>
+
+        <div style="flex:1 1 0%; width:100%; min-width:200px;">
+            <div class="progress-track" style="width:100%; background:rgba(255,255,255,0.2);">
+                <div class="progress-fill" style="width:@(BudgetPct)%; background:var(--coral);"></div>
             </div>
         </div>
-        
-        <span class="progress-pct whitespace-nowrap" style="background: rgba(255,255,255,0.1); color: var(--cream);">
+
+        <span class="progress-pct" style="white-space:nowrap; background:rgba(255,255,255,0.1); color:var(--cream);">
             @FormatFt(spentToday) / @FormatFt(dailyBudget) · @BudgetPct%
         </span>
     </section>
 
     <!-- Alsó kártyák: Egyenleg és Tárca (2 oszlop) -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        
+    <section style="display:grid; grid-template-columns:1fr; gap:1.5rem; width:100%;" class="home-lower-grid">
+
         <!-- Egyenleg (Coral színű kártya) -->
-        <div class="card balance-card flex flex-col justify-center shadow-sm" style="background-color: var(--coral); border: none;">
-            <p class="card-label" style="color: rgba(255,255,255,0.8);">Egyenleg</p>
-            <p class="card-value" style="color: white; font-size: 42px;">@FormatFt(BalanceCardValue)</p>
-            
-            <div class="mt-4 flex flex-col items-start gap-2">
-                <button class="balance-toggle w-full text-left" style="background: rgba(255,255,255,0.2); color: white;" @onclick="ToggleBalanceScope">
+        <div class="card" style="display:flex; flex-direction:column; justify-content:center; background-color:var(--coral); border:none;">
+            <p class="card-label" style="color:rgba(255,255,255,0.8);">Egyenleg</p>
+            <p class="card-value" style="color:white; font-size:42px;">@FormatFt(BalanceCardValue)</p>
+
+            <div style="margin-top:1rem; display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+                <button class="balance-toggle" style="width:100%; text-align:left; background:rgba(255,255,255,0.2); color:white;" @onclick="ToggleBalanceScope">
                     @(showAllBalance ? "Összes tárcán" : "Fő tárca (1)")
                 </button>
                 @if (monthlyChange is decimal pct)
                 {
-                    <span class="badge w-full" style="background: rgba(255,255,255,0.2); color: white;">
+                    <span class="badge" style="width:100%; background:rgba(255,255,255,0.2); color:white;">
                         @(pct >= 0 ? $"↑ +{pct}" : $"↓ {pct}")% az előző hónaphoz
                     </span>
                 }
                 else
                 {
-                    <span class="badge w-full" style="background: rgba(255,255,255,0.2); color: white;">— nincs előző havi adat</span>
+                    <span class="badge" style="width:100%; background:rgba(255,255,255,0.2); color:white;">— nincs előző havi adat</span>
                 }
             </div>
         </div>
 
         <!-- Aktív tárca előnézet (Fehér kártya) -->
-        <div class="card wallet-preview-card shadow-sm" style="background-color: var(--surface);">
-            <select class="wallet-select w-full mb-4" style="padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 14px;" @bind="selectedWalletId" @bind:after="OnWalletSelectChanged">
+        <div class="card" style="background-color:var(--surface);">
+            <select style="width:100%; margin-bottom:1rem; padding:8px; border:1px solid var(--border); border-radius:8px; background:white; font-size:14px;"
+                    @bind="selectedWalletId" @bind:after="OnWalletSelectChanged">
                 <option value="0">Összes tárca</option>
                 @foreach (var w in wallets)
                 {
@@ -66,7 +67,7 @@
                 }
             </select>
             <p class="card-label">@SelectedWalletLabel</p>
-            <p class="card-value" style="font-size: 32px;">@FormatFt(SelectedWalletBalance)</p>
+            <p class="card-value" style="font-size:32px;">@FormatFt(SelectedWalletBalance)</p>
             <p class="card-sub">@(selectedWalletId == 0 ? "Összes tárca egyenlege" : "Jelenlegi tárca egyenlege")</p>
         </div>
     </section>
