@@ -1,0 +1,419 @@
+@page "/wallets"
+@rendermode InteractiveServer
+@inject IWalletService WalletService
+@inject ICategoryService CategoryService
+@inject ITransactionService TransactionService
+
+<PageTitle>Tárcák</PageTitle>
+
+<main>
+    <section class="summary-bar" aria-label="Tárca összesítő">
+        <div class="sum-item">
+            <p class="sum-label">Összes egyenleg</p>
+            <p class="sum-value">@FormatFt(totalBalance)</p>
+        </div>
+        <div class="sum-divider"></div>
+        <div class="sum-item">
+            <p class="sum-label">Allokált</p>
+            <p class="sum-value">@FormatFt(allocatedBalance)</p>
+        </div>
+        <div class="alloc-track" aria-hidden="true">
+            <div class="alloc-fill" style="width:@AllocationPercent%"></div>
+        </div>
+        <div class="sum-item">
+            <p class="sum-label">Szabad</p>
+            <p class="sum-value">@FormatFt(freeBalance)</p>
+        </div>
+    </section>
+
+    <details class="wallets-section" open>
+        <summary class="wallets-section-header">
+            <span>Tárcák <small>@wallets.Count aktív</small></span>
+            <span class="collapse-hint">Kártyák megjelenítése</span>
+        </summary>
+
+        <div class="wallets-grid">
+            @foreach (var wallet in wallets)
+            {
+                <button type="button" class="wallet-card @(selectedWallet?.ID == wallet.ID ? "selected" : "")"
+                        style="--wallet-color:@wallet.Color"
+                        @onclick="@(() => SelectWallet(wallet))">
+                    <span class="wc-icon">@wallet.Icon</span>
+                    <span class="wc-name">@wallet.Name</span>
+                    <span class="wc-amount">@FormatFt(wallet.Balance)</span>
+                    <span class="wc-sub">@(string.IsNullOrWhiteSpace(wallet.Description) ? "Nincs leírás" : wallet.Description)</span>
+                    <span class="wc-bar"><span class="wc-bar-fill" style="width:@WalletPercent(wallet.Balance)%"></span></span>
+                </button>
+            }
+
+            <button type="button" class="wallet-card wallet-card-new" @onclick="StartNewWallet">
+                <span class="plus-icon">+</span>
+                <span>Új tárca</span>
+            </button>
+        </div>
+    </details>
+
+    @if (draft is not null)
+    {
+        <section class="detail-panel">
+            <div class="detail-panel-header">
+                <h3>@(isNewWallet ? "Új tárca" : $"{draft.Icon} {draft.Name}")</h3>
+                <div class="header-actions">
+                    <button type="button" class="btn btn-outline" @onclick="SaveWalletAsync">Mentés</button>
+                    @if (!isNewWallet && selectedWallet is not null && !selectedWallet.IsMain)
+                    {
+                        <button type="button" class="btn btn-danger" @onclick="DeleteWalletAsync">Tárca törlése</button>
+                    }
+                </div>
+            </div>
+
+            <div class="detail-body">
+                <div class="edit-col">
+                    <p class="col-title">Tárca beállításai</p>
+                    <div class="form-group">
+                        <label for="wallet-name">Név</label>
+                        <input id="wallet-name" type="text" @bind="draft.Name" maxlength="50" />
+                    </div>
+                    <div class="form-group">
+                        <label for="wallet-description">Leírás</label>
+                        <input id="wallet-description" type="text" @bind="draft.Description" />
+                    </div>
+                    <div class="form-group">
+                        <label>Ikon</label>
+                        <div class="icon-picker">
+                            @foreach (var icon in icons)
+                            {
+                                <button type="button" class="icon-btn @(icon == draft.Icon ? "active" : "")" @onclick="@(() => draft.Icon = icon)">@icon</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Szín</label>
+                        <div class="color-picker">
+                            @foreach (var color in colors)
+                            {
+                                <button type="button" class="color-dot @(color == draft.Color ? "active" : "")" style="background:@color" aria-label="Szín kiválasztása" @onclick="@(() => draft.Color = color)"></button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (!isNewWallet && selectedWallet is not null)
+                {
+                    <div class="actions-col">
+                        <p class="col-title">Műveletek</p>
+                        <div class="action-card">
+                            <p class="ac-title">Feltöltés</p>
+                            <p class="ac-desc">Összeg áthelyezése a fő számláról ebbe a tárcába.</p>
+                            <div class="ac-row">
+                                <input type="number" min="1" @bind="topUpAmount" placeholder="Összeg (Ft)" />
+                                <button type="button" class="btn btn-primary" @onclick="TopUpAsync">Feltölt</button>
+                            </div>
+                        </div>
+                        <div class="action-card">
+                            <p class="ac-title">Kivét</p>
+                            <p class="ac-desc">Összeg visszautalása a fő számlára.</p>
+                            <div class="ac-row">
+                                <input type="number" min="1" @bind="withdrawAmount" placeholder="Összeg (Ft)" />
+                                <button type="button" class="btn btn-outline" @onclick="WithdrawAsync">Kivét</button>
+                            </div>
+                        </div>
+                        <div class="action-card">
+                            <p class="ac-title">Tárca → tárca átutalás</p>
+                            <p class="ac-desc">Az átutalás nem jelenik meg a tranzakciók között.</p>
+                            <div class="ac-row">
+                                <input type="number" min="1" @bind="transferAmount" placeholder="Összeg (Ft)" />
+                                <select @bind="transferTargetId">
+                                    <option value="0">Cél tárca...</option>
+                                    @foreach (var target in wallets.Where(w => w.ID != selectedWallet.ID))
+                                    {
+                                        <option value="@target.ID">@target.Name</option>
+                                    }
+                                </select>
+                                <button type="button" class="btn btn-outline" @onclick="TransferAsync">Küld</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <p class="wallet-message @(messageIsError ? "error" : "success")">@message</p>
+    }
+
+    <section class="transactions-section">
+        <div class="card">
+            <div class="transactions-header">
+                <h2>Tranzakciók</h2>
+                <button type="button" class="btn btn-primary" @onclick="OpenTransactionModal">+ Rögzítés</button>
+            </div>
+            <div class="filter-bar">
+                <select @bind="filterWalletId" @bind:after="ApplyFiltersAsync">
+                    <option value="0">Összes tárca</option>
+                    @foreach (var wallet in wallets)
+                    {
+                        <option value="@wallet.ID">@wallet.Name</option>
+                    }
+                </select>
+                <select @bind="filterCategoryId" @bind:after="ApplyFiltersAsync">
+                    <option value="0">Összes kategória</option>
+                    @foreach (var category in categories)
+                    {
+                        <option value="@category.ID">@category.CategoryName</option>
+                    }
+                </select>
+                <select @bind="filterType" @bind:after="ApplyFiltersAsync">
+                    <option value="">Összes típus</option>
+                    <option value="@TransactionType.expense">Kiadás</option>
+                    <option value="@TransactionType.income">Bevétel</option>
+                    <option value="@TransactionType.transfer">Átutalás</option>
+                </select>
+                <button type="button" class="btn btn-ghost" @onclick="ClearFilters">Törlés</button>
+            </div>
+            <table class="transactions-table">
+                <thead><tr><th>Dátum</th><th>Leírás</th><th>Kategória</th><th>Tárca</th><th>Összeg</th></tr></thead>
+                <tbody>
+                    @if (transactions.Count == 0)
+                    {
+                        <tr><td colspan="5" class="empty-row">Nincs találat.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var transaction in transactions)
+                        {
+                            <tr>
+                                <td>@transaction.Date.ToString("yyyy.MM.dd")</td>
+                                <td>@(string.IsNullOrWhiteSpace(transaction.Description) ? "—" : transaction.Description)</td>
+                                <td>@(transaction.Category?.CategoryName ?? "—")</td>
+                                <td>@transaction.Wallet?.Name</td>
+                                <td class="@(transaction.Type == TransactionType.expense ? "amount-expense" : "amount-income")">@(transaction.Type == TransactionType.expense ? "-" : "+")@FormatFt(transaction.Amount)</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<TransactionModal Visible="transactionModalVisible" Wallets="wallets" Categories="categories" OnClose="CloseTransactionModal" OnSave="SaveTransactionAsync" />
+
+@code {
+    private static readonly System.Globalization.NumberFormatInfo Huf = new() { NumberGroupSeparator = " ", NumberDecimalDigits = 0 };
+    private readonly List<string> icons = ["🛒", "✈️", "🐷", "🎮", "🌈", "🎁", "🏠", "🚗", "💼"];
+    private readonly List<string> colors = ["#ee6a59", "#3a3f58", "#f9ac67", "#2e7d32", "#1565c0", "#6a1b9a", "#ad1457", "#00838f"];
+
+    private List<Wallet> wallets = [];
+    private List<Category> categories = [];
+    private List<Transaction> transactions = [];
+    private Wallet? selectedWallet;
+    private Wallet? draft;
+    private bool isNewWallet;
+    private int totalBalance;
+    private int allocatedBalance;
+    private int freeBalance;
+    private int topUpAmount;
+    private int withdrawAmount;
+    private int transferAmount;
+    private int transferTargetId;
+    private int filterWalletId;
+    private int filterCategoryId;
+    private TransactionType? filterType;
+    private string? message;
+    private bool messageIsError;
+    private bool transactionModalVisible;
+
+    private string AllocationPercent => totalBalance <= 0 ? "0" : Math.Clamp(allocatedBalance * 100m / totalBalance, 0, 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+        categories = await CategoryService.GetActiveAsync();
+        await ApplyFiltersAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        wallets = await WalletService.GetActiveAsync();
+        totalBalance = await WalletService.GetTotalBalanceAsync();
+        allocatedBalance = await WalletService.GetAllocatedBalanceAsync();
+        freeBalance = totalBalance - allocatedBalance;
+
+        if (selectedWallet is not null)
+            selectedWallet = wallets.FirstOrDefault(w => w.ID == selectedWallet.ID);
+    }
+
+    private void SelectWallet(Wallet wallet)
+    {
+        selectedWallet = wallet;
+        draft = Clone(wallet);
+        isNewWallet = false;
+        message = null;
+    }
+
+    private void StartNewWallet()
+    {
+        selectedWallet = null;
+        draft = new Wallet { Name = "Új tárca", Icon = icons[0], Color = colors[0] };
+        isNewWallet = true;
+        message = null;
+    }
+
+    private async Task SaveWalletAsync()
+    {
+        if (draft is null || string.IsNullOrWhiteSpace(draft.Name))
+        {
+            SetMessage("A tárca neve kötelező.", true);
+            return;
+        }
+
+        if (isNewWallet)
+        {
+            selectedWallet = await WalletService.CreateAsync(draft);
+            isNewWallet = false;
+        }
+        else
+        {
+            await WalletService.UpdateAsync(draft);
+            selectedWallet = draft;
+        }
+
+        await ReloadAsync();
+        selectedWallet = wallets.First(w => w.ID == selectedWallet!.ID);
+        draft = Clone(selectedWallet);
+        SetMessage("A tárca adatai elmentve.");
+    }
+
+    private async Task DeleteWalletAsync()
+    {
+        if (selectedWallet is null) return;
+
+        try
+        {
+            await WalletService.DeleteAsync(selectedWallet.ID);
+            selectedWallet = null;
+            draft = null;
+            await ReloadAsync();
+            await ApplyFiltersAsync();
+            SetMessage("A tárca törölve, az összege visszakerült a fő számlára.");
+        }
+        catch (InvalidOperationException exception)
+        {
+            SetMessage(exception.Message, true);
+        }
+    }
+
+    private async Task TopUpAsync()
+    {
+        if (selectedWallet is null || topUpAmount <= 0) { SetMessage("Adj meg pozitív összeget.", true); return; }
+        await MoveFromMainAsync(topUpAmount, false);
+    }
+
+    private async Task WithdrawAsync()
+    {
+        if (selectedWallet is null || withdrawAmount <= 0) { SetMessage("Adj meg pozitív összeget.", true); return; }
+        await MoveFromMainAsync(withdrawAmount, true);
+    }
+
+    private async Task TransferAsync()
+    {
+        if (selectedWallet is null || transferTargetId == 0 || transferAmount <= 0)
+        {
+            SetMessage("Válassz cél tárcát és adj meg pozitív összeget.", true);
+            return;
+        }
+
+        try
+        {
+            await WalletService.TransferBalanceAsync(selectedWallet.ID, transferTargetId, transferAmount);
+            transferAmount = 0;
+            await ReloadAsync();
+            SelectWallet(wallets.First(w => w.ID == selectedWallet.ID));
+            SetMessage("Az átutalás sikeres. Ez nem került be a tranzakciók közé.");
+        }
+        catch (InvalidOperationException exception)
+        {
+            SetMessage(exception.Message, true);
+        }
+    }
+
+    private async Task MoveFromMainAsync(int amount, bool withdraw)
+    {
+        try
+        {
+            await WalletService.MoveFromMainAsync(selectedWallet!.ID, amount, withdraw);
+            topUpAmount = 0;
+            withdrawAmount = 0;
+            await ReloadAsync();
+            SelectWallet(wallets.First(w => w.ID == selectedWallet.ID));
+            await ApplyFiltersAsync();
+            SetMessage("A pénzmozgás és a tranzakciók mentése sikeres.");
+        }
+        catch (InvalidOperationException exception)
+        {
+            SetMessage(exception.Message, true);
+        }
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        transactions = await TransactionService.GetAsync(new TransactionFilter
+        {
+            WalletID = filterWalletId == 0 ? null : filterWalletId,
+            CategoryID = filterCategoryId == 0 ? null : filterCategoryId,
+            Type = filterType
+        });
+    }
+
+    private async Task ClearFilters()
+    {
+        filterWalletId = 0;
+        filterCategoryId = 0;
+        filterType = null;
+        await ApplyFiltersAsync();
+    }
+
+    private void OpenTransactionModal() => transactionModalVisible = true;
+    private void CloseTransactionModal() => transactionModalVisible = false;
+
+    private async Task SaveTransactionAsync(Transaction transaction)
+    {
+        try
+        {
+            await TransactionService.AddAsync(transaction);
+            transactionModalVisible = false;
+            await ReloadAsync();
+            await ApplyFiltersAsync();
+        }
+        catch (InvalidOperationException exception)
+        {
+            SetMessage(exception.Message, true);
+        }
+    }
+
+    private void SetMessage(string text, bool error = false)
+    {
+        message = text;
+        messageIsError = error;
+    }
+
+    private static Wallet Clone(Wallet wallet) => new()
+    {
+        ID = wallet.ID,
+        Name = wallet.Name,
+        Description = wallet.Description,
+        Balance = wallet.Balance,
+        Active = wallet.Active,
+        IsMain = wallet.IsMain,
+        Icon = wallet.Icon,
+        Color = wallet.Color
+    };
+
+    private int WalletPercent(int balance)
+        => totalBalance <= 0 ? 0 : Math.Clamp((int)Math.Round(balance * 100d / totalBalance), 0, 100);
+
+    private static string FormatFt(int amount) => $"{amount.ToString("N0", Huf)} Ft";
+}

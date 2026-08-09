@@ -1,0 +1,93 @@
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 46, 63, 0.45);
+    z-index: 200;
+}
+
+.modal-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(420px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    z-index: 201;
+    box-shadow: 0 12px 40px rgba(58, 63, 88, 0.25);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+    .modal-header h3 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 18px;
+        font-weight: 400;
+        color: var(--text-primary);
+    }
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+    .modal-close:hover {
+        color: var(--text-primary);
+    }
+
+.modal-body {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.m-group {
+    display: flex;
+    flex-direction: column;
+}
+
+    .m-group label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+    }
+
+    .m-group input,
+    .m-group select {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        color: var(--text-primary);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+        .m-group input:focus,
+        .m-group select:focus {
+            border-color: var(--navy);
+        }
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 1rem 1.5rem 1.25rem;
+    border-top: 1px solid var(--border);
+}
